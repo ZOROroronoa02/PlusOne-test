@@ -17,7 +17,7 @@ export const DURATIONS: number[] = [1, 2, 3, 4, 6, 8];
 export const VIRTUAL_MODES = ["Text", "Voice", "Video"] as const;
 export type VirtualMode = (typeof VIRTUAL_MODES)[number];
 
-export const IN_PERSON_CITIES = ["Ghaziabad", "Noida", "Delhi NCR"] as const;
+export const IN_PERSON_CITIES = ["Ghaziabad", "Noida", "Gurugram", "Delhi NCR"] as const;
 
 export const PROMO_CODE = "FIRST100";
 export const PROMO_DISCOUNT_INR = 100;

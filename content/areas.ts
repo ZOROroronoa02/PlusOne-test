@@ -16,6 +16,10 @@ export const SERVED_AREAS: ServedArea[] = [
     note: "Office parties, corporate galas, cinema runs, Sector 18 wanderings.",
   },
   {
+    city: "Gurugram",
+    note: "Corporate events, mall meetups, café hangouts, city walks.",
+  },
+  {
     city: "Delhi NCR",
     note: "City tours, gigs, bookshops, and a genuinely good plate of chaat.",
   },
@@ -26,4 +30,4 @@ export const SERVED_AREAS: ServedArea[] = [
   },
 ];
 
-export const COMING_SOON_AREAS = ["Gurugram", "Mumbai", "Pune", "Bengaluru"];
+export const COMING_SOON_AREAS = ["Mumbai", "Pune", "Bengaluru"];

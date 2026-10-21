@@ -12,7 +12,7 @@ export function canonical(path: string): Metadata["alternates"] {
   return { canonical: path };
 }
 
-const AREA_SERVED = ["Ghaziabad", "Noida", "Delhi NCR"];
+const AREA_SERVED = ["Ghaziabad", "Noida", "Gurugram", "Delhi NCR"];
 
 export function localBusinessSchema(): Record<string, unknown> {
   return {
