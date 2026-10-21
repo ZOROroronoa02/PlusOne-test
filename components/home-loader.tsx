@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const LOADER_VIDEOS = ["/loader.mp4", "/loader2.mp4"];
@@ -8,6 +8,8 @@ const LOADER_VIDEOS = ["/loader.mp4", "/loader2.mp4"];
 export function HomeLoader() {
   const [visible, setVisible] = useState(true);
   const [src, setSrc] = useState(LOADER_VIDEOS[0]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setSrc(LOADER_VIDEOS[Math.floor(Math.random() * LOADER_VIDEOS.length)]);
@@ -15,17 +17,14 @@ export function HomeLoader() {
 
   useEffect(() => {
     const hide = () => setVisible(false);
-    if (document.readyState === "complete") {
-      const id = window.setTimeout(hide, 3000);
-      return () => window.clearTimeout(id);
-    }
-    window.addEventListener("load", hide, { once: true });
-    const fallback = window.setTimeout(hide, 3000);
-    return () => {
-      window.removeEventListener("load", hide);
-      window.clearTimeout(fallback);
-    };
+    const fallback = window.setTimeout(hide, 5000);
+    return () => window.clearTimeout(fallback);
   }, []);
+
+  const handleReady = () => {
+    if (timerRef.current) return;
+    timerRef.current = window.setTimeout(() => setVisible(false), 3000);
+  };
 
   return (
     <AnimatePresence>
@@ -39,12 +38,16 @@ export function HomeLoader() {
           aria-hidden
         >
         <video
+          ref={videoRef}
           key={src}
           src={src}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
+          onCanPlay={handleReady}
+          onError={() => setVisible(false)}
           className="absolute inset-0 h-full w-full object-cover opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent" />
