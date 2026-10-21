@@ -1,0 +1,437 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Currency glyph isolation                                           */
+/*  U+20B9 (₹) is the only character we ever render that lives in the   */
+/*  latin-ext subsets Google serves, and Next declares every subset in  */
+/*  the @font-face rules (its `subsets` option only controls *preload*). */
+/*  So a price on the page used to drag in ~144KB of latin-ext — 115KB   */
+/*  of it Unbounded's alone. A local-only face scoped to that one        */
+/*  codepoint, listed ahead of the webfont in each stack, keeps the      */
+/*  symbol off the network. If no local match exists the browser falls   */
+/*  through to the webfont exactly as before, so this is safe to lose.   */
+/* ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: "PlusOneCurrency";
+  src:
+    local("Segoe UI"), local("Roboto"), local("Helvetica Neue"),
+    local("Arial"), local("Noto Sans"), local("DejaVu Sans");
+  unicode-range: U+20B9;
+}
+
+/* ------------------------------------------------------------------ */
+/*  PlusOne — design tokens                                            */
+/*  Every theme exposes the same contract; components only ever read   */
+/*  semantic tokens (bg / ink / accent / panel ...) so a palette morph */
+/*  is a single attribute flip on <html>.                              */
+/* ------------------------------------------------------------------ */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-panel: var(--panel);
+  --color-panel-ink: var(--panel-ink);
+  --color-shadow: var(--shadow);
+  --color-danger: var(--danger);
+
+  /* Map the semantic font tokens onto the raw variables that next/font
+     injects on <body>. Pointing these at themselves would be a cycle, which
+     silently invalidates the property and drops text back to the system
+     stack — so these names must stay distinct from the next/font names.
+     "PlusOneCurrency" leads each stack so the rupee sign stays local. */
+  --font-display: "PlusOneCurrency", var(--font-unbounded);
+  --font-body: "PlusOneCurrency", var(--font-space-grotesk);
+  --font-mono: "PlusOneCurrency", var(--font-space-mono);
+
+  /* 12vw keeps the hero inside a 320px-wide screen: Unbounded is a very wide
+     face, so at 9vw the longest word ("occasion.") forced a horizontal
+     overflow below ~384px. See scripts/audit-viewport.mjs. */
+  --text-hero: clamp(2.75rem, 13vw, 8rem);
+  --text-section: clamp(2rem, 6vw, 4rem);
+}
+
+/* Display type is set in a wide, uppercase face with big tracking; allow a
+   last-resort mid-word break so no heading can ever widen the page. */
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Palettes                                                           */
+/*  Every text token below is verified against its own background with  */
+/*  the WCAG 2.1 contrast formula (see scripts/check-contrast.mjs).     */
+/*  Periwinkle is a mid-tone brand colour: it can only support pure     */
+/*  white body text, so its ink and muted are deliberately identical.   */
+/* ------------------------------------------------------------------ */
+
+/* Paper (default) --------------------------------------------------- */
+:root,
+[data-theme="paper"] {
+  --bg: #f4f1ea;
+  --ink: #0a0a0a;
+  --muted: rgba(10, 10, 10, 0.6);
+  --line: rgba(10, 10, 10, 0.5);
+  --accent: #ff2e88;
+  --accent-ink: #0a0a0a;
+  --panel: #0a0a0a;
+  --panel-ink: #f4f1ea;
+  --shadow: #0a0a0a;
+  --danger: #b0003f;
+  --muted-on-panel: rgba(244, 241, 234, 0.72);
+  --line-on-panel: rgba(244, 241, 234, 0.5);
+}
+
+/* Hot Pink ---------------------------------------------------------- */
+[data-theme="pink"] {
+  --bg: #ff2e88;
+  --ink: #0a0a0a;
+  --muted: rgba(10, 10, 10, 0.82);
+  --line: rgba(10, 10, 10, 0.65);
+  --accent: #c6f432;
+  --accent-ink: #0a0a0a;
+  --panel: #0a0a0a;
+  --panel-ink: #f4f1ea;
+  --shadow: #0a0a0a;
+  --danger: #3d0f2a;
+  --muted-on-panel: rgba(244, 241, 234, 0.78);
+  --line-on-panel: rgba(244, 241, 234, 0.5);
+}
+
+/* Periwinkle -------------------------------------------------------- */
+[data-theme="periwinkle"] {
+  --bg: #6e62e5;
+  --ink: #ffffff;
+  --muted: #ffffff;
+  --line: rgba(255, 255, 255, 0.75);
+  --accent: #c6f432;
+  --accent-ink: #0a0a0a;
+  --panel: #0a0a0a;
+  --panel-ink: #f4f1ea;
+  --shadow: #0a0a0a;
+  --danger: #ffffff;
+  --muted-on-panel: rgba(244, 241, 234, 0.78);
+  --line-on-panel: rgba(244, 241, 234, 0.5);
+}
+
+/* Acid Lime --------------------------------------------------------- */
+[data-theme="lime"] {
+  --bg: #c6f432;
+  --ink: #0a0a0a;
+  --muted: rgba(10, 10, 10, 0.62);
+  --line: rgba(10, 10, 10, 0.5);
+  --accent: #ff2e88;
+  --accent-ink: #0a0a0a;
+  --panel: #0a0a0a;
+  --panel-ink: #c6f432;
+  --shadow: #0a0a0a;
+  --danger: #b0003f;
+  --muted-on-panel: rgba(198, 244, 50, 0.78);
+  --line-on-panel: rgba(198, 244, 50, 0.5);
+}
+
+/* Stark Black ------------------------------------------------------- */
+[data-theme="black"] {
+  --bg: #0a0a0a;
+  --ink: #f4f1ea;
+  --muted: rgba(244, 241, 234, 0.66);
+  --line: rgba(244, 241, 234, 0.5);
+  --accent: #ff2e88;
+  --accent-ink: #0a0a0a;
+  --panel: #f4f1ea;
+  --panel-ink: #0a0a0a;
+  --shadow: #f4f1ea;
+  --danger: #ff9ec4;
+  --muted-on-panel: rgba(10, 10, 10, 0.72);
+  --line-on-panel: rgba(10, 10, 10, 0.5);
+}
+
+/* Inside a contrast block the muted ink has to follow the panel, not
+   the page, or it disappears. Only --muted is swapped; stickers and
+   buttons that intentionally use --bg/--ink keep their page colours. */
+.tone-panel {
+  --muted: var(--muted-on-panel);
+  --line: var(--line-on-panel);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Radio/checkbox choices hide the real input, so the ring has to move to
+   the visible label or keyboard users lose their place entirely. */
+.choice:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Theme morph: only transitions while the palette is flipping. */
+html.theme-morph,
+html.theme-morph * {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease,
+    outline-color 300ms ease,
+    fill 300ms ease,
+    stroke 300ms ease,
+    box-shadow 300ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  html.theme-morph,
+  html.theme-morph * {
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Texture + shared primitives                                        */
+/*  These live in @layer components so Tailwind utilities can still   */
+/*  override them — e.g. text-accent-ink on a .btn-ghost inside the    */
+/*  accent CTA band. Unlayered custom CSS outranks every utility,      */
+/*  which silently broke that override per palette.                    */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  [data-theme="black"] .noise {
+    mix-blend-mode: screen;
+    opacity: 0.05;
+  }
+
+  /* Sticker chip: vibe tags, badges, price flags */
+  .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    border: 2px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--shadow);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Hard-offset pill button that presses down on click */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    border-radius: 999px;
+    border: 2px solid var(--ink);
+    padding: 0.85rem 1.6rem;
+    min-height: 44px;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    background: var(--ink);
+    color: var(--bg);
+    box-shadow: 4px 4px 0 var(--shadow);
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--shadow);
+  }
+
+  .btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--shadow);
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--ink);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn:hover,
+    .btn:active {
+      transform: none;
+    }
+  }
+
+  /* Marker underline for display type */
+  .mark {
+    background: linear-gradient(transparent 62%, var(--accent) 62%, var(--accent) 92%, transparent 92%);
+    padding-inline: 0.06em;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Marquee ticker                                                   */
+  /* ---------------------------------------------------------------- */
+
+  .marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+
+  .marquee-slow {
+    animation-duration: 46s;
+  }
+
+  .marquee-reverse {
+    animation-direction: reverse;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      animation: none;
+    }
+  }
+
+  /* Ticking urgency dot for live slot scarcity */
+  @keyframes tick {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.82);
+    }
+  }
+
+  .tick-dot {
+    animation: tick 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tick-dot {
+      animation: none;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Review wall — torn tickets and polaroids                           */
+/* ------------------------------------------------------------------ */
+
+.ticket {
+  position: relative;
+}
+
+.ticket::before,
+.ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  transform: translateY(-50%);
+}
+
+.ticket::before {
+  left: -11px;
+}
+
+.ticket::after {
+  right: -11px;
+}
+
+.ticket-perforation {
+  border-top: 2px dashed currentColor;
+  opacity: 0.45;
+}
+
+.polaroid {
+  padding-bottom: 3.25rem;
+}
+
+.polaroid::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 72px;
+  height: 22px;
+  background: var(--accent);
+  opacity: 0.85;
+  transform: translateX(-50%) rotate(-3deg);
+}
+
